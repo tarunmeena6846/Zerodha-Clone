@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Landing from "./components/Landing";
 import Appbar from "./components/Appbar";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Portfolio />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </RecoilRoot>
     </Router>

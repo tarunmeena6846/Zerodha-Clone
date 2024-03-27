@@ -74,15 +74,17 @@ router.get(
         console.log(" bIsAdminPresent at /me route", bIsAdminPresent);
         if (bIsAdminPresent) {
           res.status(200).send({
+            success: true,
             userEmail: bIsAdminPresent.username,
+
             // userData: bIsAdminPresent,
             // subscription: bIsAdminPresent.subscriptions,
           });
         } else {
-          res.status(401).send("unauthorised");
+          res.status(401).send({ success: false, userEmail: "" });
         }
       } else {
-        res.status(401).send("Unauthorised");
+        res.status(401).send({ success: false, userEmail: "" });
       }
     } catch (error: any) {
       console.error("Error in admin signup:", error);

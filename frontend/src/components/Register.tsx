@@ -6,20 +6,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState } from "recoil";
 import { userState } from "../store/user";
-// import { useRecoilState } from "recoil";
 function Register() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [userInfo, setUserInfo] = useRecoilState(userState);
-  // const [username, setUserName] = React.useState("");
-  // const [msg, setMsg] = useState("");
-
-  // const [currentUserState, setCurrentUserState] = useRecoilState(userState);
-  // const [registrationError, setRegistrationError] = useState("");
-
+  
   const navigate = useNavigate();
 
-  // console.log(password);
   const handleRegister = async () => {
     if (!email || !password) {
       // Display an error message or prevent the registration process
@@ -63,7 +56,6 @@ function Register() {
               setEmail(e.target.value);
             }}
             label="Email"
-            // inputProps={{ maxLength: 15 }}
             variant="outlined"
             type={"email"}
             fullWidth

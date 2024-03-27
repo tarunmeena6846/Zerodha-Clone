@@ -3,12 +3,6 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Card, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import {
-//   SubscriptionData,
-//   subscriptionState,
-//   userState,
-// } from "./store/atoms/user";
-// import { useRecoilState } from "recoil";
 import axios from "axios";
 import { userState } from "../store/user";
 import { useRecoilState } from "recoil";

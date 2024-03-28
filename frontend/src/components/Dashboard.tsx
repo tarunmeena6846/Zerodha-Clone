@@ -1,9 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userState } from "../store/user";
 import StockPopup from "./StockPopup";
 import Portfolio from "./Portfolio";
+// import Holdings from "./Holdings";
+import { holdingState } from "../store/holdings";
 
 // Function to determine if the change is positive or negative
 export const getColor = (change: number) => {
@@ -13,11 +15,81 @@ export const getColor = (change: number) => {
 const Dashboard: React.FC = () => {
   const [stocks, setStocks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [holdings, setHoldings] = useState([]);
   const [stocksPerPage] = useState(10);
+  const [holdings, setHoldings] = useRecoilState(holdingState);
   const userEmail = useRecoilValue(userState);
   const [selectedStock, setSelectedStock] = useState<any>(null);
+  console.log("holdingstate", holdings);
+  //   const calculateProfitLoss = (holding: any) => {
+  //     const stock = stocks.find((s) => s.symbol === holding.stock);
+  //     if (stock) {
+  //       const profitOrLoss =
+  //         (stock.lastPrice - holding.averagePrice) * holding.quantity;
+  //       return profitOrLoss.toFixed(2);
+  //     }
+  //     return 0; // Return 0 if the stock is not found
+  //   };
 
+  //   // Calculate profit or loss for each holding in the holdings array
+  //   const profitLossData = holdings.map((holding: any) => ({
+  //     ...holding,
+  //     profitLoss: calculateProfitLoss(holding),
+  //   }));
+
+  //   // Total profit till now
+  //   const totalProfit = profitLossData.reduce(
+  //     (total, holding) => total + parseFloat(holding.profitLoss),
+  //     0
+  //   );
+
+  //   console.log("profitLossData", profitLossData);
+  //   console.log("Total profit till now:", totalProfit);
+  // Function to calculate profit or loss for a holding
+  const calculateProfitLoss = (holding: any, stock: any) => {
+    if (stock) {
+      const profitOrLoss =
+        (stock.lastPrice - holding.averagePrice) * holding.quantity;
+      return profitOrLoss.toFixed(2);
+    }
+    return 0; // Return 0 if the stock is not found
+  };
+
+  // Calculate current value, total invested, and profit/loss for each holding
+  const holdingData = holdings.map((holding: any) => {
+    const stock = stocks.find((s) => s.symbol === holding.stock);
+    const currentValue = stock
+      ? (holding.quantity * stock.lastPrice).toFixed(2)
+      : 0;
+    const profitLoss = calculateProfitLoss(holding, stock);
+    return {
+      ...holding,
+      currentValue,
+      profitLoss,
+    };
+  });
+
+  // Calculate total current value
+  const totalCurrentValue = holdingData.reduce(
+    (total, holding) => total + parseFloat(holding.currentValue),
+    0
+  );
+
+  // Calculate total amount invested
+  const totalAmountInvested = holdings.reduce(
+    (total, holding) => total + holding.quantity * holding.averagePrice,
+    0
+  );
+
+  // Calculate total profit or loss
+  const totalProfitLoss = holdingData.reduce(
+    (total, holding) => total + parseFloat(holding.profitLoss),
+    0
+  );
+
+  console.log("Holding Data:", holdingData);
+  console.log("Total current value:", totalCurrentValue);
+  console.log("Total amount invested:", totalAmountInvested);
+  console.log("Total profit/loss:", totalProfitLoss);
   useEffect(() => {
     const fetchData = async () => {
       const options = {
@@ -59,8 +131,8 @@ const Dashboard: React.FC = () => {
           }
         );
         if (response.data.success) {
-          console.log("holding related data fetched new trade");
-          //   setHoldings(response.data.data);
+          console.log("honldings ", response.data.data);
+          setHoldings(response.data.data);
         }
       } catch (error) {
         // setStocks([]);
@@ -146,7 +218,11 @@ const Dashboard: React.FC = () => {
               </tr>
             ))}
             {selectedStock && (
-              <StockPopup stock={selectedStock} onClose={closePopup} />
+              <StockPopup
+                stock={selectedStock}
+                onClose={closePopup}
+                isLiveStock={true}
+              />
             )}
           </tbody>
         </table>
@@ -167,14 +243,17 @@ const Dashboard: React.FC = () => {
       <div className="md:w-3/4 p-4">
         <div className="p-4 mb-4">Hi, {userEmail.userEmail.split("@")[0]}</div>
         <Portfolio />
+        <h2 className="text-xl">Returns</h2>
+        {/* <Holdings /> */}
         <div>
-          <h2 className="text-xl">Holdings</h2>
           <div className="flex flex-row  justify-between max-w-lg pt-4">
-            <h2 className={`text-5xl ${getColor(16)}`}>16.3k</h2>
+            <h2 className={`text-5xl ${getColor(16)}`}>
+              {totalProfitLoss.toFixed(2)}
+            </h2>
 
             <div className="flex flex-col">
-              <h2>current value : 67.5k</h2>
-              <h2>Investment : 50.k</h2>
+              <h2>current value : {totalCurrentValue.toFixed(2)}</h2>
+              <h2>Investment : {totalAmountInvested.toFixed(2)}</h2>
             </div>
           </div>
         </div>

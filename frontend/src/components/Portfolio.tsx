@@ -1,11 +1,13 @@
 // src/components/Portfolio.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import StockPopup from "./StockPopup";
 
 const Portfolio: React.FC = () => {
   const [trades, setTrades] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [stocksPerPage] = useState(5);
+  const [selectedStock, setSelectedStock] = useState<any>(null);
 
   useEffect(() => {
     const fetchHoldingData = async () => {
@@ -36,10 +38,21 @@ const Portfolio: React.FC = () => {
   const indexOfFirstStock = indexOfLastStock - stocksPerPage;
   const currentTrades = trades.slice(indexOfFirstStock, indexOfLastStock);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const handleStockClick = (stock: any) => {
+    setSelectedStock(stock);
+  };
+
+  const closePopup = () => {
+    setSelectedStock(null);
+  };
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toDateString(); // Format to display only the date part
+  };
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-xl mb-4">Portfolio</h2>
+      <h2 className="text-xl mb-4">Trades</h2>
       <table className="w-full bg-white overflow-hidden mb-4 p-10">
         <thead className="">
           <tr>
@@ -62,7 +75,7 @@ const Portfolio: React.FC = () => {
         </thead>
         <tbody className="divide-y divide-gray-200">
           {currentTrades.map((stock: any, index: number) => (
-            <tr key={index}>
+            <tr key={index} onClick={() => handleStockClick(stock)}>
               <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium`}>
                 {stock.stock}
               </td>
@@ -77,12 +90,19 @@ const Portfolio: React.FC = () => {
                 {stock.type}
               </td>
               <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium`}>
-                {stock.date}
+                {formatDate(stock.date)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {selectedStock && (
+        <StockPopup
+          stock={selectedStock}
+          onClose={closePopup}
+          isLiveStock={false}
+        />
+      )}
       <div className="flex justify-center items-center mt-4 space-x-2">
         {[...Array(Math.ceil(trades.length / stocksPerPage))].map(
           (number, index) => (

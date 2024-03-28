@@ -5,35 +5,35 @@ import { getColor } from "./Dashboard";
 import { holdingState } from "../store/holdings";
 import { useRecoilState } from "recoil";
 
-const Holdings: React.FC = () => {
+const Returns: React.FC = () => {
   const [holdings, setHoldings] = useRecoilState(holdingState);
   const [currentPage, setCurrentPage] = useState(1);
   const [stocksPerPage] = useState(5);
 
-//   useEffect(() => {
-//     const fetchHoldingData = async () => {
-//       try {
-//         const response = await axios.get(
-//           `${import.meta.env.VITE_SERVER_URL}/portfolio/holdings`,
-//           {
-//             headers: {
-//               "Content-Type": "application/json",
-//               Authorization: "Bearer " + localStorage.getItem("token"),
-//             },
-//           }
-//         );
-//         if (response.data.success) {
-//           console.log("honldings ", response.data.data);
-//           setHoldings(response.data.data);
-//         }
-//       } catch (error) {
-//         // setStocks([]);
-//         console.error(error);
-//       }
-//     };
+  useEffect(() => {
+    const fetchHoldingData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/portfolio/returns`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+        if (response.data.success) {
+          console.log("honldings ", response.data.data);
+          setHoldings(response.data.data);
+        }
+      } catch (error) {
+        // setStocks([]);
+        console.error(error);
+      }
+    };
 
-//     fetchHoldingData();
-//   }, []); // Empty dependency array
+    fetchHoldingData();
+  }, []); // Empty dependency array
 
   const indexOfLastStock = currentPage * stocksPerPage;
   const indexOfFirstStock = indexOfLastStock - stocksPerPage;
@@ -98,4 +98,4 @@ const Holdings: React.FC = () => {
   );
 };
 
-export default Holdings;
+export default Returns;

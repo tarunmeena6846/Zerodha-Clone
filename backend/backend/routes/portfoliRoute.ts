@@ -46,44 +46,6 @@ router.get(
   }
 );
 
-// Get cumulative returns
-router.get(
-  "/returns",
-  detokenizeAdmin,
-  async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const portfolio = await Portfolio.findOne();
-      if (!portfolio) {
-        return res
-          .status(404)
-          .json({ success: false, error: "Portfolio not found" });
-      }
-      const trades = await Trade.find({ _id: { $in: portfolio.trades } });
-
-      let initialInvestment = 0;
-      trades.forEach((trade) => {
-        if (trade.type === "buy") {
-          initialInvestment += trade.price * trade.quantity;
-        }
-      });
-
-      const finalValue = Object.values(portfolio.holdings).reduce(
-        (total, holding) => {
-          return total + holding.quantity * 100; // Assuming final price is 100
-        },
-        0
-      );
-
-      const cumulativeReturn =
-        (finalValue - initialInvestment) / initialInvestment;
-
-      res.json({ success: true, data: cumulativeReturn });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  }
-);
-
 router.post(
   "/addTrade",
   detokenizeAdmin,
@@ -96,7 +58,6 @@ router.post(
         quantity: quantity,
         price: price,
         type: type,
-        // date: date,
       }); // Ensure req.body properties match ITrade interface
 
       await newTrade.save();
@@ -125,18 +86,42 @@ router.post(
         const holding = portfolio.holdings[holdingIndex];
         let totalQuantity;
         if (type === "buy") {
+          // Calculate total quantity after adding the new buy trade
           totalQuantity = holding.quantity + quantity;
-        } else {
+          // Calculate total value after adding the new buy trade
+          const totalValue =
+            holding.quantity * holding.averagePrice + quantity * price;
+          // Calculate new average price after adding the new buy trade
+          const newAveragePrice = totalValue / totalQuantity;
+
+          holding.quantity = totalQuantity;
+          holding.averagePrice = newAveragePrice;
+        } else if (type === "sell") {
+          // Calculate total quantity after subtracting the sold quantity
           totalQuantity = holding.quantity - quantity;
+          if (totalQuantity < 0) {
+            // Handle error if trying to sell more than available quantity
+            return res.status(400).json({
+              success: false,
+              error: "Insufficient quantity in holding",
+            });
+          }
+          if (totalQuantity === 0) {
+            // If total quantity becomes 0, remove the holding
+            portfolio.holdings.splice(holdingIndex, 1);
+          } else {
+            // Calculate total value after subtracting the sold quantity
+            const totalValue =
+              holding.quantity * holding.averagePrice - quantity * price;
+            // Calculate new average price after subtracting the sold quantity
+            const newAveragePrice =
+              totalQuantity > 0 ? totalValue / totalQuantity : 0;
+
+            holding.quantity = totalQuantity;
+            holding.averagePrice = newAveragePrice;
+          }
         }
-        const totalValue =
-          holding.quantity * holding.averagePrice + quantity * price;
-        const newAveragePrice = totalValue / totalQuantity;
-
-        holding.quantity = totalQuantity;
-        holding.averagePrice = newAveragePrice;
       }
-
       // Push the trade document's _id to the portfolio's trades array
       portfolio.trades.push(newTrade._id);
 
@@ -149,55 +134,135 @@ router.post(
     }
   }
 );
-
-// Update trade
-router.post(
-  "/updateTrade",
+/// Remove trade
+router.delete(
+  "/removeTrade/:tradeId",
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { tradeId, newTradeData } = req.body;
-      const portfolio = await Portfolio.findOne();
+      const { tradeId } = req.params;
+
+      // Find the trade in the trade schema
+      const trade = await Trade.findById(tradeId);
+      if (!trade) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Trade not found" });
+      }
+
+      // Find the associated holding in the portfolio
+      const portfolio = await Portfolio.findOne({ trades: tradeId });
       if (!portfolio) {
         return res
           .status(404)
           .json({ success: false, error: "Portfolio not found" });
       }
-      const tradeIndex = portfolio.trades.findIndex(
-        (trade) => trade._id === tradeId
+
+      const holdingIndex = portfolio.holdings.findIndex(
+        (holding) => holding.stock === trade.stock
       );
-      if (tradeIndex !== -1) {
-        portfolio.trades[tradeIndex] = newTradeData;
-        await portfolio.save();
-        res.json({ success: true });
-      } else {
-        res.status(404).json({ success: false, error: "Trade not found" });
+      if (holdingIndex === -1) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Holding not found" });
       }
+
+      const holding = portfolio.holdings[holdingIndex];
+
+      // Calculate the impact of the removed trade on the holding's quantity and average price
+      const updatedQuantity =
+        trade.type === "buy"
+          ? holding.quantity - trade.quantity
+          : holding.quantity + trade.quantity;
+      const updatedTotalValue =
+        holding.quantity * holding.averagePrice - trade.quantity * trade.price;
+      const updatedAveragePrice =
+        updatedQuantity > 0 ? updatedTotalValue / updatedQuantity : 0;
+
+      // Update the holding's quantity and average price
+      holding.quantity = updatedQuantity;
+      holding.averagePrice = updatedAveragePrice;
+
+      // Remove the trade from the trade schema and update the portfolio's trades array
+      await Trade.findByIdAndDelete(tradeId);
+      portfolio.trades = portfolio.trades.filter(
+        (tradeRef) => tradeRef.toString() !== tradeId
+      );
+
+      // Save the changes to the portfolio
+      await portfolio.save();
+
+      res.json({ success: true });
     } catch (error: any) {
+      console.error("Error removing trade:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   }
 );
 
-// Remove trade
+// Update trade
 router.post(
-  "/removeTrade",
+  "/updateTrade/:tradeId",
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { tradeId } = req.body;
-      const portfolio = await Portfolio.findOne();
+      const { tradeId } = req.params;
+      const { quantity, price } = req.body;
+      console.log(tradeId, quantity, price);
+      // Find the trade in the trade schema
+      const trade = await Trade.findById(tradeId);
+      if (!trade) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Trade not found" });
+      }
+
+      // Find the associated holding in the portfolio
+      const portfolio = await Portfolio.findOne({ trades: tradeId });
       if (!portfolio) {
         return res
           .status(404)
           .json({ success: false, error: "Portfolio not found" });
       }
-      portfolio.trades = portfolio.trades.filter(
-        (trade) => trade._id !== tradeId
+
+      const holdingIndex = portfolio.holdings.findIndex(
+        (holding) => holding.stock === trade.stock
       );
+      if (holdingIndex === -1) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Holding not found" });
+      }
+
+      const holding = portfolio.holdings[holdingIndex];
+
+      // Calculate the impact of the updated trade on the holding's quantity and average price
+      const updatedQuantity =
+        trade.type === "buy"
+          ? holding.quantity - trade.quantity + quantity
+          : holding.quantity + trade.quantity - quantity;
+      const updatedTotalValue =
+        holding.quantity * holding.averagePrice -
+        trade.quantity * trade.price +
+        quantity * price;
+      const updatedAveragePrice =
+        updatedQuantity > 0 ? updatedTotalValue / updatedQuantity : 0;
+
+      // Update the holding's quantity and average price
+      holding.quantity = updatedQuantity;
+      holding.averagePrice = updatedAveragePrice;
+
+      // Update the trade in the trade schema
+      trade.quantity = quantity;
+      trade.price = price;
+      await trade.save();
+
+      // Save the changes to the portfolio
       await portfolio.save();
+
       res.json({ success: true });
     } catch (error: any) {
+      console.error("Error updating trade:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   }

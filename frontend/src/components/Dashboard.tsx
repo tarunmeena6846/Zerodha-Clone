@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userState } from "../store/user";
 import StockPopup from "./StockPopup";
+import Portfolio from "./Portfolio";
 
 const Dashboard: React.FC = () => {
   const [stocks, setStocks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [holdings, setHoldings] = useState([]);
   const [stocksPerPage] = useState(10);
   const userEmail = useRecoilValue(userState);
   const [selectedStock, setSelectedStock] = useState<any>(null);
@@ -39,6 +41,30 @@ const Dashboard: React.FC = () => {
     fetchData();
   }, []); // Empty dependency array to ensure the effect runs only once
 
+  useEffect(() => {
+    const fetchHoldingData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/portfolio/holdings`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+        if (response.data.success) {
+          console.log("holding related data fetched new trade");
+        //   setHoldings(response.data.data);
+        }
+      } catch (error) {
+        // setStocks([]);
+        console.error(error);
+      }
+    };
+
+    fetchHoldingData();
+  }, []); // Empty dependency array
   const handleStockClick = (stock: any) => {
     setSelectedStock(stock);
   };
@@ -140,15 +166,83 @@ const Dashboard: React.FC = () => {
       </div>
       <div className="md:w-3/4 p-4">
         <div className="p-4 mb-4">Hi, {userEmail.userEmail.split("@")[0]}</div>
+        <Portfolio />
         <div>
           <h2 className="text-xl">Holdings</h2>
           <div className="flex flex-row  justify-between max-w-lg pt-4">
-            <h2 className={`text-5xl ${getColor(-16)}`}>16.3k</h2>
+            <h2 className={`text-5xl ${getColor(16)}`}>16.3k</h2>
 
             <div className="flex flex-col">
               <h2>current value : 67.5k</h2>
               <h2>Investment : 50.k</h2>
             </div>
+          </div>
+          <div className="pt-10">
+            <table className="w-full bg-white overflow-hidden mb-4">
+              <thead className="">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock Name
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Quantity
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Avg. cost
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    LTP
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Curr. Val.
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    P&L
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {holdings.map((stock: any, index: number) => (
+                  <tr key={index}>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getColor(
+                        stock.lastPrice - stock.previousClose
+                      )}`}
+                    >
+                      {stock.symbol}
+                    </td>
+
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
+                        stock.lastPrice - stock.previousClose
+                      )}`}
+                    >
+                      {stock.change}
+                    </td>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
+                        (stock.lastPrice - stock.previousClose) /
+                          stock.previousClose
+                      )}`}
+                    >
+                      {(
+                        ((stock.lastPrice - stock.previousClose) /
+                          stock.previousClose) *
+                        100
+                      ).toFixed(2)}
+                      %
+                    </td>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
+                        stock.lastPrice - stock.previousClose
+                      )}`}
+                    >
+                      {stock.lastPrice}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
         {/* Name and holdings content here */}

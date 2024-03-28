@@ -12,7 +12,7 @@ router.get(
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const portfolio = await Portfolio.findOne();
+      const portfolio = await Portfolio.findOne().populate("trades");
       if (!portfolio) {
         return res
           .status(404)
@@ -90,25 +90,67 @@ router.get(
   }
 );
 
-// Add trade
 router.post(
   "/addTrade",
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { stock, quantity, price, type, date } = req.body;
+      console.log("inside add trade", type, stock, quantity, price);
+      const newTrade = new Trade({
+        stock: stock,
+        quantity: quantity,
+        price: price,
+        type: type,
+        // date: date,
+      }); // Ensure req.body properties match ITrade interface
 
-      const newTrade = { stock, quantity, price, type, date }; // Ensure req.body properties match ITrade interface
-      const portfolio = await Portfolio.findOne();
+      await newTrade.save();
+      // Get or create the portfolio instance
+      let portfolio = await Portfolio.findOne({ user: req.user }); // Assuming portfolio is associated with the user
+
       if (!portfolio) {
-        return res
-          .status(404)
-          .json({ success: false, error: "Portfolio not found" });
+        // If portfolio does not exist, create a new one
+        portfolio = new Portfolio({ user: req.user, holdings: [], trades: [] });
       }
-      portfolio.trades.push(newTrade as ITrade);
+
+      // Update holdings based on the new trade
+      let holdingIndex = portfolio.holdings.findIndex(
+        (holding) => holding.stock === stock
+      );
+
+      if (holdingIndex === -1) {
+        // If the stock is not found in holdings, add a new holding
+        portfolio.holdings.push({
+          stock: stock,
+          quantity: quantity,
+          averagePrice: price,
+        });
+      } else {
+        // If the stock is found in holdings, update its quantity and average price
+        const holding = portfolio.holdings[holdingIndex];
+        let totalQuantity;
+        if (type === "buy") {
+          totalQuantity = holding.quantity + quantity;
+        } else {
+          totalQuantity = holding.quantity - quantity;
+        }
+        const totalValue =
+          holding.quantity * holding.averagePrice + quantity * price;
+        const newAveragePrice = totalValue / totalQuantity;
+
+        holding.quantity = totalQuantity;
+        holding.averagePrice = newAveragePrice;
+      }
+
+      // Push the trade document's _id to the portfolio's trades array
+      portfolio.trades.push(newTrade._id);
+
+      // Save the portfolio document
       await portfolio.save();
       res.json({ success: true, data: newTrade });
     } catch (error: any) {
+      console.error("Error saving new trade:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   }

@@ -4,19 +4,13 @@ const Landing: React.FC = () => {
   const navigate = useNavigate();
   return (
     <div>
-      <div>
-        <Button
-          onClick={() => {
-            navigate("/login");
-          }}
-        >
-          Login
-        </Button>
-        or
+      <div className="flex items-center flex-col">
+        <img src="./landing.png"></img>
         <Button
           onClick={() => {
             navigate("/register");
           }}
+          variant="contained"
         >
           SignUp
         </Button>

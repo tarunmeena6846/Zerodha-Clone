@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Card, Typography } from "@mui/material";
@@ -9,8 +9,8 @@ import { userState } from "../store/user";
 function Register() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [userInfo, setUserInfo] = useRecoilState(userState);
-  
+  const [, setUserInfo] = useRecoilState(userState);
+
   const navigate = useNavigate();
 
   const handleRegister = async () => {

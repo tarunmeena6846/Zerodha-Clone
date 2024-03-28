@@ -1,5 +1,4 @@
 import { RecoilRoot } from "recoil";
-import Portfolio from "./components/Portfolio";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -7,7 +6,6 @@ import Landing from "./components/Landing";
 import Appbar from "./components/Appbar";
 import Dashboard from "./components/Dashboard";
 import Holdings from "./components/Holdings";
-import Returns from "./components/Returns";
 
 function App() {
   return (

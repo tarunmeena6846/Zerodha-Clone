@@ -1,7 +1,6 @@
 // src/components/Portfolio.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { getColor } from "./Dashboard";
 import { holdingState } from "../store/holdings";
 import { useRecoilState } from "recoil";
 
@@ -82,17 +81,15 @@ const Returns: React.FC = () => {
         </table>
       </div>
       <div className="flex justify-center items-center mt-4 space-x-2">
-        {[...Array(Math.ceil(holdings.length / stocksPerPage))].map(
-          (number, index) => (
-            <button
-              key={index}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-              onClick={() => paginate(index + 1)}
-            >
-              {index + 1}
-            </button>
-          )
-        )}
+        {[...Array(Math.ceil(holdings.length / stocksPerPage))].map((index) => (
+          <button
+            key={index}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            onClick={() => paginate(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

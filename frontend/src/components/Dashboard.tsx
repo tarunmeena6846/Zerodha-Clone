@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
 
   // Calculate current value, total invested, and profit/loss for each holding
   const holdingData = holdings.map((holding: any) => {
-    const stock = stocks.find((s) => s.symbol === holding.stock);
+    const stock: any = stocks.find((s: any) => s.symbol === holding.stock);
     const currentValue = stock
       ? (holding.quantity * stock.lastPrice).toFixed(2)
       : 0;
@@ -76,7 +76,7 @@ const Dashboard: React.FC = () => {
 
   // Calculate total amount invested
   const totalAmountInvested = holdings.reduce(
-    (total, holding) => total + holding.quantity * holding.averagePrice,
+    (total, holding: any) => total + holding.quantity * holding.averagePrice,
     0
   );
 
@@ -227,17 +227,15 @@ const Dashboard: React.FC = () => {
           </tbody>
         </table>
         <div className="flex justify-center items-center mt-4 space-x-2">
-          {[...Array(Math.ceil(stocks.length / stocksPerPage))].map(
-            (number, index) => (
-              <button
-                key={index}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                onClick={() => paginate(index + 1)}
-              >
-                {index + 1}
-              </button>
-            )
-          )}
+          {[...Array(Math.ceil(stocks.length / stocksPerPage))].map((index) => (
+            <button
+              key={index}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md"
+              onClick={() => paginate(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
         </div>
       </div>
       <div className="md:w-3/4 p-4">

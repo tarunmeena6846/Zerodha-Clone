@@ -1,23 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 
-interface StockPopupProps {
-  stock: {
-    symbol: string;
-    dayLow: number;
-    dayHigh: number;
-    lastPrice: number;
-    _id: Number;
-  };
-  onClose: () => void;
-  isLiveStock: Boolean;
-}
-
-const StockPopup: React.FC<StockPopupProps> = ({
-  stock,
-  onClose,
-  isLiveStock,
-}) => {
+const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
   const [quantity, setQuantity] = useState(1);
   const [price, setPriceChange] = useState(stock.lastPrice);
   console.log("stock in pip", stock);

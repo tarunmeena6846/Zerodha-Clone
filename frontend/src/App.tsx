@@ -6,6 +6,7 @@ import Register from "./components/Register";
 import Landing from "./components/Landing";
 import Appbar from "./components/Appbar";
 import Dashboard from "./components/Dashboard";
+import Holdings from "./components/Holdings";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/holdings" element={<Holdings />} />
         </Routes>
       </RecoilRoot>
     </Router>

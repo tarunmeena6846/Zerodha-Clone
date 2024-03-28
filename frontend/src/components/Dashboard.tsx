@@ -5,6 +5,11 @@ import { userState } from "../store/user";
 import StockPopup from "./StockPopup";
 import Portfolio from "./Portfolio";
 
+// Function to determine if the change is positive or negative
+export const getColor = (change: number) => {
+  return change > 0 ? "text-green-500" : "text-red-500";
+};
+
 const Dashboard: React.FC = () => {
   const [stocks, setStocks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +60,7 @@ const Dashboard: React.FC = () => {
         );
         if (response.data.success) {
           console.log("holding related data fetched new trade");
-        //   setHoldings(response.data.data);
+          //   setHoldings(response.data.data);
         }
       } catch (error) {
         // setStocks([]);
@@ -76,11 +81,6 @@ const Dashboard: React.FC = () => {
   const indexOfLastStock = currentPage * stocksPerPage;
   const indexOfFirstStock = indexOfLastStock - stocksPerPage;
   const currentStocks = stocks.slice(indexOfFirstStock, indexOfLastStock);
-
-  // Function to determine if the change is positive or negative
-  const getColor = (change: number) => {
-    return change > 0 ? "text-green-500" : "text-red-500";
-  };
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -176,73 +176,6 @@ const Dashboard: React.FC = () => {
               <h2>current value : 67.5k</h2>
               <h2>Investment : 50.k</h2>
             </div>
-          </div>
-          <div className="pt-10">
-            <table className="w-full bg-white overflow-hidden mb-4">
-              <thead className="">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock Name
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Avg. cost
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    LTP
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Curr. Val.
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    P&L
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {holdings.map((stock: any, index: number) => (
-                  <tr key={index}>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getColor(
-                        stock.lastPrice - stock.previousClose
-                      )}`}
-                    >
-                      {stock.symbol}
-                    </td>
-
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
-                        stock.lastPrice - stock.previousClose
-                      )}`}
-                    >
-                      {stock.change}
-                    </td>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
-                        (stock.lastPrice - stock.previousClose) /
-                          stock.previousClose
-                      )}`}
-                    >
-                      {(
-                        ((stock.lastPrice - stock.previousClose) /
-                          stock.previousClose) *
-                        100
-                      ).toFixed(2)}
-                      %
-                    </td>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-right text-sm ${getColor(
-                        stock.lastPrice - stock.previousClose
-                      )}`}
-                    >
-                      {stock.lastPrice}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
         {/* Name and holdings content here */}

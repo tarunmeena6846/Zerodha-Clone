@@ -32,20 +32,14 @@ router.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const portfolio = await Portfolio.findOne();
-      const holdings: Record<string, Partial<IHolding>> = {};
+      // const holdings = [];
       if (!portfolio) {
         return res
           .status(404)
           .json({ success: false, error: "Portfolio not found" });
       }
-      portfolio.holdings.forEach((holding) => {
-        holdings[holding.stock] = {
-          quantity: holding.quantity,
-          averagePrice: holding.averagePrice,
-        };
-      });
 
-      res.json({ success: true, data: holdings });
+      res.json({ success: true, data: portfolio.holdings });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }

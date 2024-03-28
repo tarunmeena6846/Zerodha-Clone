@@ -53,15 +53,28 @@ const Appbar: React.FC = () => {
     <nav className="bg-gray-800 p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* App Name */}
-        <div className="text-white font-bold text-xl">Zerodha</div>
+        <div
+          className="text-white font-bold text-xl"
+          onClick={() => navigate(userInfo.loggedIn ? "/dashboard" : "/")}
+        >
+          Zerodha
+        </div>
         <div>
           {userInfo.loggedIn ? (
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-              onClick={handleLogOut}
-            >
-              Logout
-            </button>
+            <>
+              <button
+                className=" text-white px-4 py-2 rounded-md"
+                onClick={() => navigate("/holdings")}
+              >
+                Holdings
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                onClick={handleLogOut}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

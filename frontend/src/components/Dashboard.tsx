@@ -227,15 +227,17 @@ const Dashboard: React.FC = () => {
           </tbody>
         </table>
         <div className="flex justify-center items-center mt-4 space-x-2">
-          {[...Array(Math.ceil(stocks.length / stocksPerPage))].map((index) => (
-            <button
-              key={index}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-              onClick={() => paginate(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
+          {[...Array(Math.ceil(stocks.length / stocksPerPage))].map(
+            (_, index) => (
+              <button
+                key={index}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                onClick={() => paginate(index + 1)}
+              >
+                {index + 1}
+              </button>
+            )
+          )}
         </div>
       </div>
       <div className="md:w-3/4 p-4">

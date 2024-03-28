@@ -12,7 +12,9 @@ router.get(
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const portfolio = await Portfolio.findOne().populate("trades");
+      const portfolio = await Portfolio.findOne({ user: req.user }).populate(
+        "trades"
+      );
       if (!portfolio) {
         return res
           .status(404)
@@ -31,7 +33,7 @@ router.get(
   detokenizeAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const portfolio = await Portfolio.findOne();
+      const portfolio = await Portfolio.findOne({ user: req.user });
       // const holdings = [];
       if (!portfolio) {
         return res

@@ -22,6 +22,7 @@ const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
       console.log(response);
       if (response.data.success) {
         console.log("Deleted trade");
+        onClose();
         // Add logic to update UI after successful deletion if needed
       }
     } catch (error) {
@@ -47,6 +48,7 @@ const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
       console.log(response);
       if (response.data.success) {
         console.log("Updated trade");
+        onClose();
         // Add logic to update UI after successful update if needed
       }
     } catch (error) {
@@ -79,6 +81,7 @@ const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
     console.log(response);
     if (response.data.success) {
       console.log("addded new trade");
+      onClose();
     }
   };
 

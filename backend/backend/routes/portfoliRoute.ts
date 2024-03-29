@@ -26,6 +26,67 @@ router.get(
     }
   }
 );
+router.get(
+  "/returns",
+  detokenizeAdmin,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get the user's portfolio
+      const portfolio = await Portfolio.findOne({ user: req.user }).populate(
+        "trades"
+      );
+
+      if (!portfolio) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Portfolio not found" });
+      }
+
+      const tradesByStock: any = {};
+      const stockData: any = [];
+
+      // Calculate the average buying price and total buying quantity
+      portfolio.trades
+        .filter((trade) => trade.type === "buy")
+        .forEach((trade) => {
+          if (!tradesByStock[trade.stock]) {
+            tradesByStock[trade.stock] = [];
+          }
+          tradesByStock[trade.stock].push(trade);
+        });
+
+      // Calculate cumulative return for each stock
+      for (const stock in tradesByStock) {
+        const stockTrades = tradesByStock[stock];
+        const totalInvestment = stockTrades.reduce(
+          (acc: any, curr: any) => acc + curr.quantity * curr.price,
+          0
+        );
+        const totalQuantity = stockTrades.reduce(
+          (acc: any, curr: any) => acc + curr.quantity,
+          0
+        );
+        const averageCost = totalInvestment / totalQuantity;
+        const finalValue = 100;
+        const cumulativeReturn =
+          ((finalValue - totalInvestment) / totalInvestment) * 100;
+
+        stockData.push({
+          stock: stock,
+          averageBuyingCost: averageCost,
+          cumulativeReturn: cumulativeReturn,
+        });
+      }
+      console.log(stockData);
+      res.json({
+        success: true,
+        data: stockData,
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+);
 
 // Get holdings in an aggregate view
 router.get(

@@ -6,6 +6,7 @@ import StockPopup from "./StockPopup";
 import Portfolio from "./Portfolio";
 // import Holdings from "./Holdings";
 import { holdingState } from "../store/holdings";
+import Returns from "./Returns";
 
 // Function to determine if the change is positive or negative
 export const getColor = (change: number) => {
@@ -20,30 +21,6 @@ const Dashboard: React.FC = () => {
   const userEmail = useRecoilValue(userState);
   const [selectedStock, setSelectedStock] = useState<any>(null);
   console.log("holdingstate", holdings);
-  //   const calculateProfitLoss = (holding: any) => {
-  //     const stock = stocks.find((s) => s.symbol === holding.stock);
-  //     if (stock) {
-  //       const profitOrLoss =
-  //         (stock.lastPrice - holding.averagePrice) * holding.quantity;
-  //       return profitOrLoss.toFixed(2);
-  //     }
-  //     return 0; // Return 0 if the stock is not found
-  //   };
-
-  //   // Calculate profit or loss for each holding in the holdings array
-  //   const profitLossData = holdings.map((holding: any) => ({
-  //     ...holding,
-  //     profitLoss: calculateProfitLoss(holding),
-  //   }));
-
-  //   // Total profit till now
-  //   const totalProfit = profitLossData.reduce(
-  //     (total, holding) => total + parseFloat(holding.profitLoss),
-  //     0
-  //   );
-
-  //   console.log("profitLossData", profitLossData);
-  //   console.log("Total profit till now:", totalProfit);
   // Function to calculate profit or loss for a holding
   const calculateProfitLoss = (holding: any, stock: any) => {
     if (stock) {
@@ -257,7 +234,6 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Name and holdings content here */}
       </div>
     </div>
   );

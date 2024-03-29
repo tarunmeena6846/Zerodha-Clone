@@ -23,11 +23,9 @@ const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
       if (response.data.success) {
         console.log("Deleted trade");
         onClose();
-        // Add logic to update UI after successful deletion if needed
       }
     } catch (error) {
       console.error("Error deleting trade:", error);
-      // Handle error scenario
     }
   };
   const handleUpdate = async () => {
@@ -49,11 +47,9 @@ const StockPopup: React.FC<any> = ({ stock, onClose, isLiveStock }) => {
       if (response.data.success) {
         console.log("Updated trade");
         onClose();
-        // Add logic to update UI after successful update if needed
       }
     } catch (error) {
       console.error("Error updating trade:", error);
-      // Handle error scenario
     }
   };
   const handleBuy = async (type: string) => {

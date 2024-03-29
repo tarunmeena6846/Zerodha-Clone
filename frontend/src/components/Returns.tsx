@@ -1,13 +1,11 @@
 // src/components/Portfolio.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { holdingState } from "../store/holdings";
-import { useRecoilState } from "recoil";
 
 const Returns: React.FC = () => {
-  const [holdings, setHoldings] = useRecoilState(holdingState);
+  const [returns, setReturns] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [stocksPerPage] = useState(5);
+  const [stocksPerPage] = useState(10);
 
   useEffect(() => {
     const fetchHoldingData = async () => {
@@ -22,8 +20,8 @@ const Returns: React.FC = () => {
           }
         );
         if (response.data.success) {
-          console.log("honldings ", response.data.data);
-          setHoldings(response.data.data);
+          console.log("returns ", response.data);
+          setReturns(response.data.data);
         }
       } catch (error) {
         // setStocks([]);
@@ -36,7 +34,7 @@ const Returns: React.FC = () => {
 
   const indexOfLastStock = currentPage * stocksPerPage;
   const indexOfFirstStock = indexOfLastStock - stocksPerPage;
-  const currentTrades = holdings.slice(indexOfFirstStock, indexOfLastStock);
+  const currentTrades = returns.slice(indexOfFirstStock, indexOfLastStock);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
@@ -49,10 +47,10 @@ const Returns: React.FC = () => {
                 Stock Name
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Quantity
+                Avg. Buying Price
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Avg. cost
+                Cumilative Return
               </th>
             </tr>
           </thead>
@@ -68,12 +66,12 @@ const Returns: React.FC = () => {
                 <td
                   className={`px-6 py-4 whitespace-nowrap text-sm font-medium`}
                 >
-                  {stock.quantity}
+                  {stock.averageBuyingCost}
                 </td>
                 <td
                   className={`px-6 py-4 whitespace-nowrap text-sm font-medium`}
                 >
-                  {stock.averagePrice}
+                  {stock.cumulativeReturn}
                 </td>
               </tr>
             ))}
@@ -81,15 +79,17 @@ const Returns: React.FC = () => {
         </table>
       </div>
       <div className="flex justify-center items-center mt-4 space-x-2">
-        {[...Array(Math.ceil(holdings.length / stocksPerPage))].map((index) => (
-          <button
-            key={index}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md"
-            onClick={() => paginate(index + 1)}
-          >
-            {index + 1}
-          </button>
-        ))}
+        {[...Array(Math.ceil(returns.length / stocksPerPage))].map(
+          (_, index) => (
+            <button
+              key={index}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md"
+              onClick={() => paginate(index + 1)}
+            >
+              {index + 1}
+            </button>
+          )
+        )}
       </div>
     </div>
   );

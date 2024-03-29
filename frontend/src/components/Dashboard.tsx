@@ -6,7 +6,6 @@ import StockPopup from "./StockPopup";
 import Portfolio from "./Portfolio";
 // import Holdings from "./Holdings";
 import { holdingState } from "../store/holdings";
-import Returns from "./Returns";
 
 // Function to determine if the change is positive or negative
 export const getColor = (change: number) => {
